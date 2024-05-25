@@ -1,35 +1,87 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+/** @format */
+
+import { useState } from "react";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
+import { useId } from "react";
+import ContactForm from "./components/ContactForm";
+import ContactList from "./components/ContactList";
+
+import "./App.css";
+import SearchBox from "./components/SearchBox";
+
+const initialContacts = [
+	{ id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
+	{ id: "id-2", name: "Hermione Kline", number: "443-89-12" },
+	{ id: "id-3", name: "Eden Clements", number: "645-17-79" },
+	{ id: "id-4", name: "Annie Copeland", number: "227-91-26" },
+];
 
 function App() {
-  const [count, setCount] = useState(0)
+	const [contacts, setContacts] = useState(initialContacts);
+	const newId = useId();
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+	const handleDelete = (id) => {
+		const updatedContacts = contacts.filter((contact) => contact.id !== id);
+		setContacts(updatedContacts);
+	};
+
+	const handleSubmit = (values, { resetForm }) => {
+		addContact({
+			id: newId + "-" + Date.now(),
+			name: values.name,
+			number: values.number,
+		});
+		resetForm();
+	};
+
+	const handleChange = (searchContact, evt) => {
+		const query = evt.target.value;
+		searchContact(query);
+	};
+
+	const searchContact = (query) => {
+		const filteredContacts = initialContacts.filter(
+			(contact) =>
+				contact.name.toLowerCase().includes(query.toLowerCase()) ||
+				contact.number.toLowerCase().includes(query.toLowerCase())
+		);
+		setContacts(filteredContacts);
+	};
+
+	const addContact = (newContact) => {
+		setContacts((prevContacts) => [...prevContacts, newContact]);
+		console.log("Contact added:", newContact);
+	};
+
+	const contactSchema = Yup.object().shape({
+		name: Yup.string()
+			.required("Name is required")
+			.min(3, "Name must be at least 3 characters")
+			.max(50, "Name must be at most 50 characters"),
+		number: Yup.string()
+			.required("Phone number is required")
+			.min(10, "Phone number must be at least 10 characters")
+			.max(50, "Phone number must be at most 50 characters"),
+	});
+
+	return (
+		<>
+			<h1>Phonebook</h1>
+			<Formik
+				initialValues={{ name: "", number: "" }}
+				onSubmit={handleSubmit}
+				validationSchema={contactSchema}>
+				<Form>
+					<ContactForm id={newId} />
+				</Form>
+			</Formik>
+			<SearchBox onChange={(query) => handleChange(searchContact, query)} />
+			<ContactList
+				contacts={contacts}
+				onDelete={handleDelete}
+			/>
+		</>
+	);
 }
-
-export default App
+export default App;
