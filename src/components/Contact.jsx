@@ -1,6 +1,6 @@
 /** @format */
 
-const Contacts = ({ contact, onDelete }) => {
+const Contact = ({ contact, onDelete }) => {
 	const handleClick = () => {
 		onDelete(contact.id);
 	};
@@ -13,4 +13,4 @@ const Contacts = ({ contact, onDelete }) => {
 	);
 };
 
-export default Contacts;
+export default Contact;

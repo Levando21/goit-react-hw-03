@@ -1,11 +1,11 @@
 /** @format */
-import Contacts from "./Contacts";
+import Contact from "./Contact";
 const ContactList = ({ contacts, onDelete }) => {
 	return (
 		<div>
 			<ul>
 				{contacts.map((contact) => (
-					<Contacts
+					<Contact
 						key={contact.id}
 						contact={contact}
 						onDelete={onDelete}

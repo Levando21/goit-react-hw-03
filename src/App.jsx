@@ -1,14 +1,14 @@
 /** @format */
 
 import { useState } from "react";
-import { Formik, Form } from "formik";
-import * as Yup from "yup";
+import { useEffect } from "react";
+
 import { useId } from "react";
 import ContactForm from "./components/ContactForm";
 import ContactList from "./components/ContactList";
+import SearchBox from "./components/SearchBox";
 
 import "./App.css";
-import SearchBox from "./components/SearchBox";
 
 const initialContacts = [
 	{ id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
@@ -18,7 +18,10 @@ const initialContacts = [
 ];
 
 function App() {
-	const [contacts, setContacts] = useState(initialContacts);
+	const [contacts, setContacts] = useState(() => {
+		const savedContacts = localStorage.getItem("update-data");
+		return savedContacts ? JSON.parse(savedContacts) : initialContacts;
+	});
 	const newId = useId();
 
 	const handleDelete = (id) => {
@@ -54,28 +57,17 @@ function App() {
 		console.log("Contact added:", newContact);
 	};
 
-	const contactSchema = Yup.object().shape({
-		name: Yup.string()
-			.required("Name is required")
-			.min(3, "Name must be at least 3 characters")
-			.max(50, "Name must be at most 50 characters"),
-		number: Yup.string()
-			.required("Phone number is required")
-			.min(10, "Phone number must be at least 10 characters")
-			.max(50, "Phone number must be at most 50 characters"),
-	});
+	useEffect(() => {
+		localStorage.setItem("update-data", JSON.stringify(contacts));
+	}, [contacts]);
 
 	return (
 		<>
 			<h1>Phonebook</h1>
-			<Formik
-				initialValues={{ name: "", number: "" }}
-				onSubmit={handleSubmit}
-				validationSchema={contactSchema}>
-				<Form>
-					<ContactForm id={newId} />
-				</Form>
-			</Formik>
+			<ContactForm
+				id={newId}
+				handleSubmit={handleSubmit}
+			/>
 			<SearchBox onChange={(query) => handleChange(searchContact, query)} />
 			<ContactList
 				contacts={contacts}
